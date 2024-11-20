@@ -1,29 +1,76 @@
 import React from "react";
+import MoreInfo from "./moreInfo";
+import { useState } from "react";
 
-function Books() {
+function Books(props) {
+    console.log(props.info);
+    
+    const data = props.info.volumeInfo;
+    let authors = data.authors;
+    let code = data.industryIdentifiers;
+    let picture = data.imageLinks.thumbnail;
 
-  return (
-    <>
+    //to show more info for each book
+    const [show, setShow] = useState(false);
+    const [book, setBook] = useState();
 
-        <div className="bookContainer">
-            <div className="bookInfo1">
-                <img src="icon.png" alt="no pic for u"></img>
-                <div className="info_1">
-                    <p>title</p>
-                    <p>authors</p>
-                    <p>whatever else you want</p>
+    function fetchAuthors(){
+        try{
+            if(authors.length > 2)
+                authors = authors[0] + ", " + authors[1] + " ...";
+            else if(authors.length === 2)
+                authors = authors[0] + ", " + authors[1];
+            else
+                authors = authors[0];
+
+            return authors;
+        }catch(error){
+            console.log(error);
+        }
+    }
+
+    //only isbn13.. make it for isbn10 too later
+    function isbn(){
+        try {
+            if(!code)
+                code = "-";
+            else {
+                if (code[0].type === "ISBN_13")
+                    code = code[0].identifier;
+                else if (code.length > 1 && code[1].type === "ISBN_13")
+                    code = code[1].identifier;
+                else
+                    code = "-";
+            }
+
+            return code;
+        } catch (error) {
+            console.log("error=" + error);
+        }
+    }
+
+    if (authors && picture) {
+        return (
+            <>
+                <div className="bookContainer" onClick={()=> {setShow(true); setBook(props)}}>
+                    <div className="bookInfo">
+                        <img src={picture} alt="icon.png"></img>
+                        <div className="info">
+                            <span className="title">{data.title}</span>
+                            <p>{fetchAuthors()}</p>
+                            <span>Published: {data.publishedDate}</span>
+                            <div className="bookInfoFooter">
+                                <br></br>
+                                <hr></hr>
+                                <span>ISBN: {isbn()}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button id="moreInfo">More details</button>
-            </div>
-            <div className="bookInfo2">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ac laoreet neque. Aliquam non iaculis ipsum. Pellentesque ultricies mauris vitae nunc porta pharetra. Morbi ut tellus dictum, imperdiet turpis ac, tristique neque. Praesent auctor ex sapien, ut vestibulum risus aliquet vel. Aenean sodales ac ex et fringilla. Proin sed iaculis erat, ut accumsan urna.</p>
-            </div>
-            
-        </div>
-
-    </>
-  )
-
+                <MoreInfo show={show} book={book} authors={authors} isbn={code} onClose={()=> setShow(false)}/>
+            </>
+        )
+    }
 }
 
 export default Books;

@@ -5,6 +5,9 @@
 body{
     margin: 0;
     background-color: lightseagreen;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: large;
+    min-width: 500px;
 }
 
 /*dvh=dynamic viewport height units
@@ -43,16 +46,6 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     color: teal;
 }
 
-/* responsive layout
-for screens less than 400px wide make the topnav links stack up
-*/
-@media screen and (max-width: 400px){
-    .topnav a{
-        float: none;
-        width: 100%;
-    }
-}
-
 .searchBarContainer{
     width: 100%;
     padding: 5% 10% 5% 10%;
@@ -70,13 +63,15 @@ for screens less than 400px wide make the topnav links stack up
     width: 100%;
     border: none;
     padding: 5px 10px 5px 10px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: large;
 }
 
 #searchInput:focus{
     outline: none;
 }
 
-.searchBar button{
+.searchBar button, .close{
     display: block;
     float: right;
     border: none;
@@ -85,89 +80,112 @@ for screens less than 400px wide make the topnav links stack up
     transition-duration: 0.2s;
 }
 
-.searchBar button:hover{
+.searchBar button:hover, .close:hover{
     background-color: white;
     cursor: pointer;
 }
 
-.searchBar button:hover #searchIcon{
+.searchBar button:hover #searchIcon, .close:hover #closeIcon{
     color: teal;
 }
 
 #searchIcon{
     color: white;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
 }
 
 .bookComponents{
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 20px;
     width: 100%;
 }
 
 .bookContainer{
-    display: flex;
-    flex-direction: column;
     padding: 20px;
     background-color: lightgrey;
-    min-width: 300px;
-    height: fit-content; /*this will be static once i decide what to write */
 }
 
-.bookInfo1{
+.bookInfo{
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    height: 100%;
+    min-width: 300px;
 }
 
-/* responsive layout
-for screens less than 400px wide make the book components look good and not ruin all the layout :)
-*/
-@media screen and (max-width: 400px){
-    .bookInfo1{
-        flex-wrap: wrap;
-    }
-    .bookComponents{
-        grid-template-columns: repeat(auto-fit, minmax(100%, 0.5fr));
-
-    }
-    .bookContainer{
-        min-width: 100%;
-        width: 100%;
-    }
+.bookInfo img{
+    height: 192px;
+    width: 128px;
 }
 
-.bookInfo1 img{
-    height: 100px;
-    width: 100px;
-    flex-grow: 0;
-}
-
-.info_1{
+.info{
     margin: 0 20px 0 20px;
-    width: fit-content;
-    flex-grow: 1;
+    width: fit-content; 
+    display: flex; 
+    flex-direction: column;  
 }
 
-#moreInfo{
-    margin: 0 0 0 20px;
-    flex-grow: 0;
+.title{
+    font-size: x-large;
+    font-weight: bold;
+    color: darkblue;
 }
 
-.bookInfo2{
-    text-align: justify;
+.bookInfoFooter{
+    margin-top: auto;
+}
+
+.bookContainer:hover{
+    background-color: white;
+    cursor: pointer;
+    border: 2px black;
+    box-shadow: 10px 10px darkcyan;
 }
 
 .footer{
     width: 100%;
-    position: relative;
     bottom: 0;
     left: 0;
     padding: 5px;
     text-align: center;
     background-color: teal;
     color: white;
+}
+
+/* responsive layout - for screens less than 450px wide */
+@media screen and (max-width: 450px){
+
+    .topnav a{
+        float: none;
+        width: 100%;
+    }
+
+    .bookInfo{
+        flex-wrap: wrap;
+    }
+
+    .bookComponents{
+        grid-template-columns: repeat(auto-fit, minmax(100%, 0.5fr));
+    }
+
+    .bookContainer{
+        min-width: 100%;
+        width: 100%;
+    }
+
+    .info{
+        margin: 0;
+        flex-wrap: wrap;
+    }
+}
+
+/* for very small widths */
+@media screen and (max-width: 215px){
+    .bookInfo img{
+        min-height: 100px;
+        min-width: 80px;
+        flex-grow: 0;
+    }
 }

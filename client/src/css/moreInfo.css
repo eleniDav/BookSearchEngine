@@ -1,0 +1,106 @@
+/* more info feature */
+/* this stops bg scrolling when more info feature is on display*/
+body.moreInfo-active{
+    overflow-y: hidden;
+}
+
+.moreInfo, .overlay{
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overlay{
+    background-color: darkgrey;
+    opacity: 0.8;
+}
+
+#closeIcon{
+    color: white;
+    top: 0;
+    right: 0;
+    height: 25px;
+    width: 25px;
+}
+
+.moreInfoContainer{
+    position: absolute;
+    height: fit-content;
+    background-color: white;
+    max-width: 500px;
+    max-height: fit-content;
+}
+
+.moreInfoDetails{
+    padding: 40px;
+}
+
+.moreInfo1{
+    display: flex;
+    flex-direction: row;
+}
+
+.moreInfo1 .titles{
+    margin: 0 20px 0 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.moreInfo1 .subtitle{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    margin-top: 20px;
+    text-align: justify;
+}
+
+.moreInfo2{
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.moreInfo2 span{
+    padding: 5px 0 5px 0;
+}
+
+.moreInfo2 span b{
+    color: darkblue;
+    font-size: large;
+    text-transform: uppercase;
+}
+
+#desc{
+    margin: 25px 0 15px 0;
+    text-align: justify;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    border-top: double black;
+}
+
+.evenMore{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.evenMore button{
+    padding: 5px 20px;
+    border-radius: 25px;
+    border: 1px solid teal;
+    background-color: teal;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: medium;
+}
+
+.evenMore button:hover{
+    background-color: white;
+    color: teal;
+    cursor: pointer;
+    transition-duration: 0.2s;
+}
