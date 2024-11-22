@@ -2,12 +2,17 @@
     box-sizing: border-box;
 }
 
+html{
+    min-width: 320px; /*min screen width is 320px*/
+}
+
 body{
     margin: 0;
+    width: 100%;
+    min-height: 100vh;
     background-color: lightseagreen;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-size: large;
-    min-width: 500px;
+    font-size: large;    
 }
 
 /*dvh=dynamic viewport height units
@@ -106,25 +111,34 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 .bookContainer{
     padding: 20px;
     background-color: lightgrey;
+    transition: 5ms;
+    min-width: 350px;
+    min-height: fit-content;
 }
 
 .bookInfo{
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
     height: 100%;
-    min-width: 300px;
 }
 
-.bookInfo img{
+.mainInfo{
+    display: flex;
+    flex-direction: row;
+}
+
+.mainInfo img{
     height: 192px;
     width: 128px;
 }
 
 .info{
-    margin: 0 20px 0 20px;
-    width: fit-content; 
-    display: flex; 
-    flex-direction: column;  
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+    height: 100%;
+    width: 100%;
 }
 
 .title{
@@ -135,13 +149,18 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 
 .bookInfoFooter{
     margin-top: auto;
+    width: 100%;
+    text-align: right;
+    word-break: break-all;
 }
 
 .bookContainer:hover{
     background-color: white;
     cursor: pointer;
     border: 2px black;
-    box-shadow: 10px 10px darkcyan;
+    box-shadow: 15px 15px darkcyan;
+    margin-top: -15px;
+    margin-bottom: 15px;
 }
 
 .footer{
@@ -156,36 +175,22 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 
 /* responsive layout - for screens less than 450px wide */
 @media screen and (max-width: 450px){
-
     .topnav a{
         float: none;
         width: 100%;
     }
-
-    .bookInfo{
-        flex-wrap: wrap;
-    }
-
     .bookComponents{
         grid-template-columns: repeat(auto-fit, minmax(100%, 0.5fr));
     }
-
     .bookContainer{
-        min-width: 100%;
         width: 100%;
+        min-width: fit-content;
     }
-
+    .mainInfo{
+        display: flex;
+        flex-direction: column;
+    }
     .info{
-        margin: 0;
-        flex-wrap: wrap;
-    }
-}
-
-/* for very small widths */
-@media screen and (max-width: 215px){
-    .bookInfo img{
-        min-height: 100px;
-        min-width: 80px;
-        flex-grow: 0;
+        padding: 0;
     }
 }

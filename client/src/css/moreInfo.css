@@ -7,7 +7,7 @@ body.moreInfo-active{
 .moreInfo, .overlay{
     position: fixed;
     height: 100vh;
-    width: 100vw;
+    width: 100%;
     top: 0;
     left: 0;
     right: 0;
@@ -32,10 +32,19 @@ body.moreInfo-active{
 
 .moreInfoContainer{
     position: absolute;
-    height: fit-content;
     background-color: white;
-    max-width: 500px;
-    max-height: fit-content;
+    width: 80%;
+    min-width: 320px;
+    height: 80%;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: teal;
 }
 
 .moreInfoDetails{
@@ -45,6 +54,11 @@ body.moreInfo-active{
 .moreInfo1{
     display: flex;
     flex-direction: row;
+}
+
+.moreInfo1 img{
+    height: 192px;
+    width: 128px;
 }
 
 .moreInfo1 .titles{

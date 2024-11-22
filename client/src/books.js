@@ -7,7 +7,7 @@ function Books(props) {
     
     const data = props.info.volumeInfo;
     let authors = data.authors;
-    let code = data.industryIdentifiers;
+    let id = data.industryIdentifiers; 
     let picture = data.imageLinks.thumbnail;
 
     //to show more info for each book
@@ -16,58 +16,65 @@ function Books(props) {
 
     function fetchAuthors(){
         try{
-            if(authors.length > 2)
-                authors = authors[0] + ", " + authors[1] + " ...";
-            else if(authors.length === 2)
-                authors = authors[0] + ", " + authors[1];
-            else
-                authors = authors[0];
-
+            if(authors){
+                if(authors.length > 2)
+                    authors = authors[0] + ", " + authors[1] + " ...";
+                else if(authors.length === 2)
+                    authors = authors[0] + ", " + authors[1];
+                else
+                    authors = authors[0];
+            }else{
+                authors = "-";
+            }
             return authors;
         }catch(error){
             console.log(error);
         }
     }
 
-    //only isbn13.. make it for isbn10 too later
-    function isbn(){
+    function ID(){
         try {
-            if(!code)
-                code = "-";
-            else {
-                if (code[0].type === "ISBN_13")
-                    code = code[0].identifier;
-                else if (code.length > 1 && code[1].type === "ISBN_13")
-                    code = code[1].identifier;
-                else
-                    code = "-";
-            }
-
-            return code;
+            if(id){
+                if(id.length === 1){
+                    id = id[0].identifier;
+                }else if (id.length > 1){
+                    //all possible values of type
+                    let isbn13 = id.find(code => code.type === "ISBN_13");
+                    let isbn10 = id.find(code => code.type === "ISBN_10");
+                    let issn = id.find(code => code.type === "ISSN");
+                    let other = id.find(code => code.type === "OTHER");
+                    //will get the value of the first not null - hierarchy/preference 
+                    id = isbn13.identifier || isbn10.identifier || issn.identifier || other.identifier;
+                }
+            }else
+                id = "-";
+            return id;
         } catch (error) {
             console.log("error=" + error);
         }
     }
 
-    if (authors && picture) {
+    if (picture) {
         return (
             <>
                 <div className="bookContainer" onClick={()=> {setShow(true); setBook(props)}}>
                     <div className="bookInfo">
-                        <img src={picture} alt="icon.png"></img>
-                        <div className="info">
-                            <span className="title">{data.title}</span>
-                            <p>{fetchAuthors()}</p>
-                            <span>Published: {data.publishedDate}</span>
-                            <div className="bookInfoFooter">
-                                <br></br>
-                                <hr></hr>
-                                <span>ISBN: {isbn()}</span>
+                        <div className="mainInfo">
+                            <img src={picture} alt="icon.png"></img>
+                            <div className="info">
+                                <span className="title">{data.title}</span>
+                                <p>{fetchAuthors()}</p>
+                                <span>Published: {data.publishedDate}</span>
                             </div>
+                        </div>
+                        <div className="bookInfoFooter">
+                            <br></br>
+                            <hr></hr>
+                            <span>ID: {ID()}</span>
                         </div>
                     </div>
                 </div>
-                <MoreInfo show={show} book={book} authors={authors} isbn={code} onClose={()=> setShow(false)}/>
+                <MoreInfo show={show} book={book} authors={authors} id={id} onClose={() => setShow(false)}/>
             </>
         )
     }

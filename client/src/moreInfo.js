@@ -3,7 +3,7 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { FaAnglesRight } from "react-icons/fa6";
 import './css/moreInfo.css';
 
-function MoreInfo({show, book, authors, isbn, onClose}) {
+function MoreInfo({show, book, authors, id, onClose}) {
     
 
     if(show){
@@ -37,23 +37,46 @@ function MoreInfo({show, book, authors, isbn, onClose}) {
                 }else{
                     return "-";
                 } 
-                    
+            }catch(error){
+                console.log("error=" + error);
+            }
+        }
+
+        function category(){
+            try{
+                const type = data.printType;
+                const categories = data.categories;
+
+                if(type){
+                    if(type === "BOOK"){
+                        if(categories){
+                            return categories.join(", ");
+                        }
+                        else
+                            return "-";
+                    }else if(type === "MAGAZINE"){
+                        return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+                    }
+                }else
+                    return "-";
             }catch(error){
                 console.log("error=" + error);
             }
         }
     
-        //handle this better.. smarter
         function desc(){
             try{
-                let desc = null;
+                const desc = data.description;
 
-                if(data.description){
-                    desc = data.description.substring(0,100) + "...";
-                    return desc;
-                }else
+                if(desc){
+                    if(desc.length > 200){
+                        return desc.split(" ").slice(0,40).join(" ") + "...";
+                    }else{
+                        return desc;
+                    }
+                }else{
                     return "";
-
+                }
             }catch(error){
                 console.log("error=" + error);
             }
@@ -78,9 +101,9 @@ function MoreInfo({show, book, authors, isbn, onClose}) {
                             <div className="moreInfo2">
                                 <span><b>Author: </b>{authors}</span>
                                 <span><b>Published: </b>{publishing()}</span>
-                                <span><b>ISBN: </b><i>{isbn}</i></span>
+                                <span><b>ID: </b><i>{id}</i></span>
                                 <span><b>Page count: </b>{data.pageCount}</span>
-                                <span><b>Category: </b>{data.categories}</span>
+                                <span><b>Category: </b>{category()}</span>
                                 <span><b>Language: </b>{data.language}</span>
                                 <span id="desc">{desc()}</span>
                             </div>
