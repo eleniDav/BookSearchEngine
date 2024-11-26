@@ -3,12 +3,12 @@ import MoreInfo from "./moreInfo";
 import { useState } from "react";
 
 function Books(props) {
-    console.log(props.info);
-    
+
     const data = props.info.volumeInfo;
     let authors = data.authors;
+    let publisher = data.publisher;
     let id = data.industryIdentifiers; 
-    let picture = data.imageLinks.thumbnail;
+    let picture = data.imageLinks && data.imageLinks.thumbnail;
 
     //to show more info for each book
     const [show, setShow] = useState(false);
@@ -27,6 +27,17 @@ function Books(props) {
                 authors = "-";
             }
             return authors;
+        }catch(error){
+            console.log(error);
+        }
+    }
+
+    function fetchPublisher(){
+        try{
+            if(publisher)
+                return publisher;
+            else
+                return "-";
         }catch(error){
             console.log(error);
         }
@@ -54,29 +65,33 @@ function Books(props) {
         }
     }
 
-    if (picture) {
-        return (
-            <>
-                <div className="bookContainer" onClick={()=> {setShow(true); setBook(props)}}>
-                    <div className="bookInfo">
-                        <div className="mainInfo">
-                            <img src={picture} alt="icon.png"></img>
-                            <div className="info">
-                                <span className="title">{data.title}</span>
-                                <p>{fetchAuthors()}</p>
-                                <span>Published: {data.publishedDate}</span>
+
+    try{
+        if (picture) {
+            return (
+                <>
+                    <div className="bookContainer" onClick={()=> {setShow(true); setBook(props)}}>
+                        <div className="bookInfo">
+                            <div className="mainInfo">
+                                <img src={picture} alt=""></img>
+                                <div className="info">
+                                    <span className="title">{data.title}</span>
+                                    <p>{fetchAuthors()}</p>
+                                    <span>Publisher: {fetchPublisher()}</span>
+                                </div>
+                            </div>
+                            <div className="bookInfoFooter">
+                                <br></br>
+                                <hr></hr>
+                                <span>ID: {ID()}</span>
                             </div>
                         </div>
-                        <div className="bookInfoFooter">
-                            <br></br>
-                            <hr></hr>
-                            <span>ID: {ID()}</span>
-                        </div>
                     </div>
-                </div>
-                <MoreInfo show={show} book={book} authors={authors} id={id} onClose={() => setShow(false)}/>
-            </>
-        )
+                    <MoreInfo show={show} book={book} authors={authors} id={id} onClose={() => setShow(false)}/>
+                </>
+            )
+    }}catch(error){
+        console.log("error=" +error);
     }
 }
 
