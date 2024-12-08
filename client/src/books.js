@@ -3,13 +3,12 @@ import MoreInfo from "./moreInfo";
 import { useState } from "react";
 
 function Books(props) {
-
     const data = props.info.volumeInfo;
     let authors = data.authors;
     let publisher = data.publisher;
     let id = data.industryIdentifiers; 
     let picture = data.imageLinks && data.imageLinks.thumbnail;
-
+    
     //to show more info for each book
     const [show, setShow] = useState(false);
     const [book, setBook] = useState();
@@ -43,20 +42,19 @@ function Books(props) {
         }
     }
 
-    function ID(){
+    function ISBN(){
         try {
             if(id){
-                if(id.length === 1){
-                    id = id[0].identifier;
-                }else if (id.length > 1){
-                    //all possible values of type
-                    let isbn13 = id.find(code => code.type === "ISBN_13");
-                    let isbn10 = id.find(code => code.type === "ISBN_10");
-                    let issn = id.find(code => code.type === "ISSN");
-                    let other = id.find(code => code.type === "OTHER");
-                    //will get the value of the first not null - hierarchy/preference 
-                    id = isbn13.identifier || isbn10.identifier || issn.identifier || other.identifier;
-                }
+                //i only want isbn 13 or 10, any other id is kinda useless
+                let isbn13 = id.find(code => code.type === "ISBN_13");
+                let isbn10 = id.find(code => code.type === "ISBN_10");
+                
+                if(isbn13)
+                    id = isbn13.identifier;
+                else if(isbn10)
+                    id = isbn10.identifier;
+                else
+                    id = "-";
             }else
                 id = "-";
             return id;
@@ -65,15 +63,13 @@ function Books(props) {
         }
     }
 
-
-    try{
-        if (picture) {
+    try{        
             return (
                 <>
                     <div className="bookContainer" onClick={()=> {setShow(true); setBook(props)}}>
                         <div className="bookInfo">
                             <div className="mainInfo">
-                                <img src={picture} alt=""></img>
+                                <img src={picture ? picture : "icon.png"} alt=""></img>
                                 <div className="info">
                                     <span className="title">{data.title}</span>
                                     <p>{fetchAuthors()}</p>
@@ -83,14 +79,14 @@ function Books(props) {
                             <div className="bookInfoFooter">
                                 <br></br>
                                 <hr></hr>
-                                <span>ID: {ID()}</span>
+                                <span>ISBN: {ISBN()}</span>
                             </div>
                         </div>
                     </div>
                     <MoreInfo show={show} book={book} authors={authors} id={id} onClose={() => setShow(false)}/>
                 </>
             )
-    }}catch(error){
+    }catch(error){
         console.log("error=" +error);
     }
 }

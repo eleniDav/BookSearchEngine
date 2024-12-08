@@ -1,0 +1,44 @@
+.filterPopup{
+    background-color: white;
+    color: black;
+    width: 95%;
+    height: fit-content;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.searchByFilter, .sortByFilter{
+    display: flex;
+    flex-direction: row;
+}
+
+.filterPopup span{
+    font-weight: bold;
+    width: 40%;
+}
+
+.filterPopup ul{
+    list-style: none;
+    margin: 0 0 0 20px;
+    padding: 0;
+    width: 60%;
+}
+
+.filterPopup button{
+    padding: 10px;
+    border: none;
+    background-color: teal;
+    text-align: center;
+    color: white;
+    font-size: large;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    transition-duration: 0.2s;
+}
+
+.filterPopup button:hover{
+    background-color: white;
+    color: teal;
+    cursor: pointer;
+}

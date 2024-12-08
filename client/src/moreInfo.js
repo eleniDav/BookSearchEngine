@@ -10,6 +10,7 @@ function MoreInfo({show, book, authors, id, onClose}) {
         document.body.classList.add('moreInfo-active');
 
         const data = book.info.volumeInfo;
+        const picture = data.imageLinks && data.imageLinks.thumbnail;
 
         function subtitle(){
             try{
@@ -90,7 +91,7 @@ function MoreInfo({show, book, authors, id, onClose}) {
                         <button className="close" onClick={onClose}><IoCloseCircleOutline id="closeIcon"/></button>
                         <div className="moreInfoDetails">
                             <div className="moreInfo1">
-                                <img src={data.imageLinks.thumbnail} alt="icon.png"></img>
+                                <img src={picture ? picture : "icon.png"} alt=""></img>
 
                                 <div className="titles">
                                     <span className="title">{data.title}</span>
@@ -101,8 +102,8 @@ function MoreInfo({show, book, authors, id, onClose}) {
                             <div className="moreInfo2">
                                 <span><b>Author: </b>{authors}</span>
                                 <span><b>Published: </b>{publishing()}</span>
-                                <span><b>ID: </b><i>{id}</i></span>
-                                <span><b>Page count: </b>{data.pageCount}</span>
+                                <span><b>ISBN: </b><i>{id}</i></span>
+                                <span><b>Page count: </b>{data.pageCount ? data.pageCount : "-"}</span>
                                 <span><b>Category: </b>{category()}</span>
                                 <span><b>Language: </b>{data.language}</span>
                                 <span id="desc">{desc()}</span>

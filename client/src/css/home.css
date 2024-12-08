@@ -90,11 +90,11 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     cursor: pointer;
 }
 
-.searchBar button:hover #searchIcon, .close:hover #closeIcon{
+.searchBar button:hover #searchIcon, .searchBar button:hover #filterIcon, .close:hover #closeIcon{
     color: teal;
 }
 
-#searchIcon{
+#searchIcon, #filterIcon{
     color: white;
     width: 30px;
     height: 30px;
