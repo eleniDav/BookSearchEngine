@@ -74,6 +74,7 @@ function Books(props) {
                                     <span className="title">{data.title}</span>
                                     <p>{fetchAuthors()}</p>
                                     <span>Publisher: {fetchPublisher()}</span>
+                                    <span>{props.i}</span>
                                 </div>
                             </div>
                             <div className="bookInfoFooter">

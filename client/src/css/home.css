@@ -85,12 +85,12 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     transition-duration: 0.2s;
 }
 
-.searchBar button:hover, .close:hover{
+.searchBar button:hover, .close:hover, #pages .btns:hover{
     background-color: white;
     cursor: pointer;
 }
 
-.searchBar button:hover #searchIcon, .searchBar button:hover #filterIcon, .close:hover #closeIcon{
+.searchBar button:hover #searchIcon, .searchBar button:hover #filterIcon, .close:hover #closeIcon, .btns:hover #prevIcon, .btns:hover #nextIcon{
     color: teal;
 }
 
@@ -161,6 +161,31 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     box-shadow: 15px 15px darkcyan;
     margin-top: -15px;
     margin-bottom: 15px;
+}
+
+#pages{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    color: white;
+    margin: auto;
+    width: fit-content;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: large;
+}
+
+#pages .btns{
+    background-color: teal;
+    padding: 5px 10px 5px 10px;
+    transition-duration: 0.2s;
+    border: none;
+}
+
+#prevIcon, #nextIcon{
+    color: white;
+    width: 20px;
+    height: 20px;
 }
 
 .footer{

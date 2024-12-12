@@ -70,8 +70,8 @@ function MoreInfo({show, book, authors, id, onClose}) {
                 const desc = data.description;
 
                 if(desc){
-                    if(desc.length > 200){
-                        return desc.split(" ").slice(0,40).join(" ") + "...";
+                    if(desc.length > 600){
+                        return desc.split(" ").slice(0,100).join(" ") + "...";
                     }else{
                         return desc;
                     }

@@ -2,17 +2,18 @@ import React, { useState } from "react";
 import "./css/filter.css";
 
 function Filter({search, sort, callbackProp, s1, s2}) {
-    //values passed from parent
+    //s1&s2 values passed from parent to child -- to show/keep the (previous)user choice every time the pop up shows
     const [searchBy, setSearchBy] = useState(s1);
     const [sortBy, setSortBy] = useState(s2);
 
+    //search&sort are the values that we send from the child to the parent -- to alter the results based on these choices
     const filterResults = () => {
         search(searchBy);
         sort(sortBy);
+    }
 
-        //will call search from parent to fetch the filtered results
+    const searchAgain = () => {
         callbackProp();
-        console.log("calling from child");
     }
     
     return (
@@ -45,6 +46,7 @@ function Filter({search, sort, callbackProp, s1, s2}) {
                     </ul>
                 </div>
                 <button onClick={filterResults}>Filter Results</button>
+                <button onClick={searchAgain}>Search for new results</button>
             </div>
         </>
     )
