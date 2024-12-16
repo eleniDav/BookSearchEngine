@@ -6,14 +6,14 @@ function NavBar() {
     return (
         <>
         <div className="header">
-            <h1><IoLibrary /> Book Search Engine</h1>
-            <p>Look up information about any book/author etc</p>
+            <button onClick={() => window.location.reload()}><h1><IoLibrary /> Bookie <IoLibrary /></h1></button>
+            <p>Discover new books, look up your favorite authors and publishers and get lost in the world of literature that the Bookie Search Engine has to offer!</p>
         </div>
         <div className="topnav">
-            <a href="#home">Home</a>
+            <a href="#home" onClick={() => window.location.reload()}>Home</a>
             <a href="#books">Books</a>
-            <a href="#authors">Authors</a>
-            <a href="#footer" style={{float:"right"}}>Contact</a>
+            <a href="#about">About</a>
+            <a href="#contact" style={{float:"right"}}>Contact</a>
         </div>
         </>
     );

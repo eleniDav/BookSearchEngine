@@ -1,9 +1,10 @@
 .filterPopup{
-    background-color: white;
+    background-color: snow;
+    border: 3px solid rgb(19, 93, 102);
     color: black;
     width: 95%;
     height: fit-content;
-    padding: 10px 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -26,19 +27,8 @@
     width: 60%;
 }
 
-.filterPopup button{
-    padding: 10px;
-    border: none;
-    background-color: teal;
-    text-align: center;
-    color: white;
-    font-size: large;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    transition-duration: 0.2s;
-}
-
-.filterPopup button:hover{
-    background-color: white;
-    color: teal;
-    cursor: pointer;
+#quantity{
+    cursor: default;
+    color: transparent;
+    text-shadow: 0px 0px black;
 }

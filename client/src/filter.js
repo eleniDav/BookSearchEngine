@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import "./css/filter.css";
 
-function Filter({search, sort, callbackProp, s1, s2}) {
-    //s1&s2 values passed from parent to child -- to show/keep the (previous)user choice every time the pop up shows
+function Filter({search, sort, rCount, r, s1, s2}) {
+    //values passed from parent to child -- to show/keep the (previous)user choice every time the pop up shows
     const [searchBy, setSearchBy] = useState(s1);
     const [sortBy, setSortBy] = useState(s2);
+    const [resultCount, setResultCount] = useState(r);
 
-    //search&sort are the values that we send from the child to the parent -- to alter the results based on these choices
-    const filterResults = () => {
-        search(searchBy);
-        sort(sortBy);
-    }
+    //the values that we send from the child to the parent -- to alter the results based on these choices
+    search(searchBy);
+    sort(sortBy);
+    rCount(resultCount);
 
-    const searchAgain = () => {
-        callbackProp();
+    const passCount = (event) => {
+        setResultCount(Number(event.target.value));
     }
     
     return (
@@ -45,8 +45,10 @@ function Filter({search, sort, callbackProp, s1, s2}) {
                             <label htmlFor="newest">Most Recently Published</label></li>
                     </ul>
                 </div>
-                <button onClick={filterResults}>Filter Results</button>
-                <button onClick={searchAgain}>Search for new results</button>
+                <div className="resultsPerPage">
+                    <span>Results shown per page: </span>
+                    <input type="number" id="quantity" min="1" max="40" value={resultCount} onChange={passCount} onKeyDown={() => {return false}}></input>
+                </div>
             </div>
         </>
     )

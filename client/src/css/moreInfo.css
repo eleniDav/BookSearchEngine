@@ -2,6 +2,7 @@
 /* this stops bg scrolling when more info feature is on display*/
 body.moreInfo-active{
     overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .moreInfo, .overlay{
@@ -18,21 +19,34 @@ body.moreInfo-active{
 }
 
 .overlay{
-    background-color: darkgrey;
+    background-color: rgb(0, 60, 67);
     opacity: 0.8;
 }
 
 #closeIcon{
-    color: white;
+    color: rgb(19, 93, 102);
     top: 0;
     right: 0;
-    height: 25px;
-    width: 25px;
+    height: 30px;
+    width: 30px;
+}
+
+.close{
+    display: block;
+    float: right;
+    border: none;
+    background-color: transparent;
+    padding: 5px 10px 5px 10px;
+    transition-duration: 0.2s;
+}
+
+.close:hover{
+    cursor: pointer;
 }
 
 .moreInfoContainer{
     position: absolute;
-    background-color: white;
+    background-color: snow;
     width: 80%;
     min-width: 320px;
     height: 80%;
@@ -44,7 +58,7 @@ body.moreInfo-active{
     width: 10px;
 }
 ::-webkit-scrollbar-thumb {
-    background: teal;
+    background: rgb(19, 93, 102);
 }
 
 .moreInfoDetails{
@@ -84,7 +98,7 @@ body.moreInfo-active{
 }
 
 .moreInfo2 span b{
-    color: darkblue;
+    color: rgb(0, 60, 67);
     font-size: large;
     text-transform: uppercase;
 }
@@ -93,7 +107,7 @@ body.moreInfo-active{
     margin: 25px 0 15px 0;
     text-align: justify;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    border-top: double black;
+    border-top: double rgb(19, 93, 102);
 }
 
 .evenMore{
@@ -104,17 +118,17 @@ body.moreInfo-active{
 .evenMore button{
     padding: 5px 20px;
     border-radius: 25px;
-    border: 1px solid teal;
-    background-color: teal;
-    color: white;
+    border: 1px solid rgb(19, 93, 102);
+    background-color: rgb(19, 93, 102);
+    color: snow;
     text-transform: uppercase;
     font-weight: bold;
     font-size: medium;
 }
 
 .evenMore button:hover{
-    background-color: white;
-    color: teal;
+    background-color: snow;
+    color: rgb(19, 93, 102);
     cursor: pointer;
     transition-duration: 0.2s;
 }

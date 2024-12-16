@@ -10,7 +10,7 @@ body{
     margin: 0;
     width: 100%;
     min-height: 100vh;
-    background-color: lightseagreen;
+    background-color: rgb(119, 176, 170);
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-size: large;    
 }
@@ -27,28 +27,42 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 .header{
     padding: 10px;
     text-align: center;
-    background-color: white;
+    background-color: snow;
+}
+
+.header button{
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    width: 100%;
+    height: max-content;
+    font-size: 100%;
+    color: rgb(19, 93, 102);
+}
+
+.header button:hover{
+    color: black;
 }
 
 .topnav{
     width: 100%;
-    background-color: teal;
+    background-color: rgb(19, 93, 102);
 }
 
 .topnav a{
     float: left;
     display: block;
     padding: 10px 20px 10px 20px; /*top right bottom left*/
-    background-color: teal;
+    background-color: rgb(19, 93, 102);
     text-align: center;
     text-decoration: none;
-    color: white;
+    color: snow;
     transition-duration: 0.4s;
 }
 
 .topnav a:hover{
-    background-color: white;
-    color: teal;
+    background-color: snow;
+    color: rgb(19, 93, 102);
 }
 
 .searchBarContainer{
@@ -60,7 +74,7 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 
 .searchBar{
     display: flex;
-    background-color: white;
+    background-color: snow;
     align-items: center;
 }
 
@@ -76,26 +90,26 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     outline: none;
 }
 
-.searchBar button, .close{
+.searchBar button{
     display: block;
     float: right;
     border: none;
-    background-color: teal;
+    background-color: rgb(19, 93, 102);
     padding: 5px 10px 5px 10px;
     transition-duration: 0.2s;
 }
 
-.searchBar button:hover, .close:hover, #pages .btns:hover{
-    background-color: white;
+.searchBar button:hover, .navBtns:hover{
+    background-color: snow;
     cursor: pointer;
 }
 
-.searchBar button:hover #searchIcon, .searchBar button:hover #filterIcon, .close:hover #closeIcon, .btns:hover #prevIcon, .btns:hover #nextIcon{
-    color: teal;
+.searchBar button:hover #searchIcon, .searchBar button:hover #filterIcon, .navBtns:hover #prevIcon, .navBtns:hover #nextIcon{
+    color: rgb(19, 93, 102);
 }
 
 #searchIcon, #filterIcon{
-    color: white;
+    color: snow;
     width: 30px;
     height: 30px;
 }
@@ -110,7 +124,7 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 
 .bookContainer{
     padding: 20px;
-    background-color: lightgrey;
+    background-color: snow;
     transition: 5ms;
     min-width: 350px;
     min-height: fit-content;
@@ -144,7 +158,7 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 .title{
     font-size: x-large;
     font-weight: bold;
-    color: darkblue;
+    color: rgb(0, 60, 67);
 }
 
 .bookInfoFooter{
@@ -155,35 +169,67 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 }
 
 .bookContainer:hover{
-    background-color: white;
     cursor: pointer;
-    border: 2px black;
-    box-shadow: 15px 15px darkcyan;
+    box-shadow: 15px 15px rgb(19, 93, 102);
     margin-top: -15px;
     margin-bottom: 15px;
 }
 
-#pages{
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: center;
-    color: white;
+#pagesContainer{
     margin: auto;
-    width: fit-content;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: large;
+    width: 80%;
 }
 
-#pages .btns{
-    background-color: teal;
+.pages{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    list-style-type: none;
+    align-items: center;
+    color: snow;
+    width: fit-content;
+    padding: 0;
+    margin: auto;
+}
+
+.btns{
+    border: 2px solid rgb(19, 93, 102);
+    background-color: snow;
+    color: rgb(19, 93, 102);
+    padding: 5px 10px 5px 10px;
+    transition-duration: 0.2s;
+    font-size: medium;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.btns:hover{
+    color: snow;
+    background-color: rgb(19, 93, 102);
+    border: 2px solid snow;
+    cursor: pointer;
+}
+
+.btns_active{
+    color: snow;
+    background-color: rgb(19, 93, 102);
+    border: 2px solid snow;
+    padding: 5px 10px 5px 10px;
+    transition-duration: 0.2s;
+    font-size: medium;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    cursor: pointer;
+}
+
+.navBtns{
+    background-color: rgb(19, 93, 102);
     padding: 5px 10px 5px 10px;
     transition-duration: 0.2s;
     border: none;
+    color: snow;
 }
 
 #prevIcon, #nextIcon{
-    color: white;
+    color: snow;
     width: 20px;
     height: 20px;
 }
@@ -194,8 +240,8 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     left: 0;
     padding: 5px;
     text-align: center;
-    background-color: teal;
-    color: white;
+    background-color: rgb(19, 93, 102);
+    color: snow;
 }
 
 /* responsive layout - for screens less than 450px wide */
