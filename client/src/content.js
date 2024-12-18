@@ -16,11 +16,11 @@ function Content(){
     //default filter values
     const [searchByOption, setSearchByOption] = useState("");
     const [sortByOption, setSortByOption] = useState("relevance");
-    const [resultsPerPage, setResultsPerPage] = useState(5);
+    const [resultsPerPage, setResultsPerPage] = useState(6);
 
     //for pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const [rsp, setRSP] = useState(5);
+    const [rsp, setRSP] = useState(6);
     const lastIndex = currentPage * rsp; //last result index in every page
     const firstIndex = lastIndex - rsp; //first result index in every page
     let numOfPages = 0;
@@ -47,7 +47,7 @@ function Content(){
     function queryPrep(smth){   
         //parsing     
         let query = smth;
-        console.log(query);
+        //console.log(query);
 
         //lowercase
         let lower = query.toLowerCase();
@@ -70,18 +70,18 @@ function Content(){
         //remove ' as well (in case some made the cut)
         let c = remApostrophes(cleaned);
 
-        /*
         //stemming - Porter Stemmer
         let stemmed = [];
         for(let i=0;i<c.length;i++){
             stemmed.push(stemmer(c[i]));
         }
-        */
+        
         //george ela,  U.S.A  PALi to ka-lo to don't prm's ,nai pali? 12dog nai       ..... pali ..ta idia t<html> idia.
         //the dog walked at the beautiful park outside roaming the prettily decorated streets
-        console.log(c);
+        
+        //console.log(c);
 
-        return c;
+        return stemmed;
     }
 
     function remApostrophes(d){
@@ -294,9 +294,8 @@ function Content(){
                     .then(response => response.json())
                     .then(console.log(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${queryPrep(inputValue)}&orderBy=${sortByOption}&maxResults=40&key=${key}`))
                     .then(data => setData(data.items))
+                    .then(preprocessing(data)) //acts on double click cause data hasnt updated yet(asynchronous)
                     .then(setFinal(inputValue))
-                    .then(console.log(data))
-                    .then(console.log(preprocessing1(data)))
                     .catch(err => console.error('error fetching data:', err));
             } else {
                 setFinal(inputValue);
@@ -308,39 +307,41 @@ function Content(){
         }
     }
 
-    function preprocessing1(dt){
-        let bookInfo = [];
-        let etag = "";
-        let title = "";
-        let isbn = "";
-        let authors = "";
-        let publishers = "";
-        let category = "";
-        let description = "";
-        let processedDesc = [];
-
-        if(dt){
-            dt.map(item => (
-                etag = item.etag,
-                title = item.volumeInfo.title,
-                isbn = item.volumeInfo.industryIdentifiers,
-                authors = item.volumeInfo.authors,
-                publishers = item.volumeInfo.publisher,
-                category = item.volumeInfo.categories,
-                description = item.volumeInfo.description,
-                bookInfo.push({'etag': etag, 'title': title, 'isbn': isbn, 'authors': authors, 'publishers': publishers, 'category': category, 'description': description})
-                
-            ));
-
-            for(let i=0;i<bookInfo.length;i++){
-                if(bookInfo[i].description){
-                    processedDesc.push(queryPrep(bookInfo[i].description));
-                }else{
-                    processedDesc.push("");
+    //kanw nlp gia tous titlous arxika (1o bhma)
+    function preprocessing(dt){
+        let processed = [];
+        let indexer = [];
+        for (let i = 0; i < dt.length; i++) {
+            if (dt[i].volumeInfo.title) {
+                processed.push({ 'id': i, 'terms': queryPrep(dt[i].volumeInfo.title) });
+                for(let j=0;j<processed[i].terms.length;j++){
+                    indexer.push({ 'term': processed[i].terms[j], 'docId': i, });
+                    indexer.sort((x,y) => x.term.localeCompare(y.term) || x.docId - y.docId);
                 }
+            } else {
+                processed.push({ 'id': i, 'terms': '' });
             }
         }
-        return processedDesc;        
+        console.log(processed);
+        console.log(indexer);
+        
+        return invertedIndex(indexer);        
+    }
+
+    function invertedIndex(index){
+        let inverted = [];
+        let almostInverted = Object.groupBy(index, ({ term }) => term);
+        for(let i=0;i<Object.keys(almostInverted).length;i++){
+            //edw kratao mono oses katagrafes exoun terms pou uparxoyn kai sto query mou, ta alla den ta xreiazomai etsi kialliws
+            if(queryPrep(inputValue).includes(Object.keys(almostInverted)[i])){
+                inverted.push({ 'term': Object.keys(almostInverted)[i], 'freq': Object.values(almostInverted)[i].length, 'postList': Object.values(almostInverted)[i].map(item => item.docId)});
+            }
+        }
+        
+        console.log(almostInverted);
+        console.log(inverted);
+
+        return inverted;
     }
 
     //useCallback hook so function wont automatically run on every render (and affect our useEffect) - it will run only when its dependencies update
@@ -402,6 +403,7 @@ function Content(){
                         {data ? data.slice(firstIndex,lastIndex).map(item => (
                             <Books key={item.etag} info={item}/>
                         )) : getResultMessage()}
+                        {console.log(data)}
                     </ul>
                     <nav id="pagesContainer" style={{display: "none"}}>
                         <ul className="pages">

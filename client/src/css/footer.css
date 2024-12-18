@@ -1,0 +1,146 @@
+.footer{
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    padding: 5px;
+    text-align: center;
+    background-color: rgb(19, 93, 102);
+    color: snow;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
+}
+
+.footer button:hover, .footer a:hover{
+    cursor: pointer;
+    transition-duration: 0.4s;
+}
+
+.footer_info1{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: left;
+    width: 300px;
+    padding: 5px;
+}
+
+.footer_info1_title{
+    font-size: x-large;
+    font-weight: bold;
+    text-align: left;
+}
+
+.footer_info1_main{
+    text-align: justify;
+    font-size: medium;
+}
+
+.footer_info1 button{
+    color: snow;
+    background-color: transparent;
+    padding: 5px;
+    width: 100%;
+    height: fit-content;
+    border: none;
+    font-size: medium;
+}
+
+.footer_info1 button:hover{
+    color: rgb(19, 93, 102);
+    background-color: snow;
+}
+
+.footer_info2{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 300px;
+}
+
+.footer_info2 a{
+    text-decoration: none;
+    color: snow;
+    padding: 10px;
+}
+
+.footer_info2 a:hover{
+    color: rgb(19, 93, 102);
+    background-color: snow;
+}
+
+.footer_info3{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5px;
+    align-items: center;
+}
+
+.footer_info3 button{
+    height: 70px;
+    width: 70px;
+    background-color: snow;
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+    color: snow;
+    text-align: center;
+}
+
+.uni{
+    height: 70px;
+    width: 170px;
+    font-size: small;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.uni_logo:hover{
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+.uni_logo img{
+    width: 70px;
+    height: 70px;
+}
+
+.socials{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 5px;
+}
+
+.socials button{
+    height: 40px;
+    width: 40px;
+    padding: 0;
+}
+
+.socials button > *{
+    width: 30px;
+    height: 30px;
+    color: rgb(19, 93, 102);
+}
+
+.socials button:hover{
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+/* responsive layout - for screens less than 450px wide */
+@media screen and (max-width: 550px){
+    .footer{
+        flex-direction: column;
+    }
+    .footer > *{
+        width: 100%;
+    }
+}
