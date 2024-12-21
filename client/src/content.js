@@ -6,6 +6,7 @@ import Books from './books';
 import Filter from './filter';
 import Popup from 'reactjs-popup';
 import 'dotenv/config'; 
+import { stemmer } from 'stemmer';
 
 function Content(){
     const [data, setData] = useState([]);
@@ -14,7 +15,7 @@ function Content(){
     const [stopwords, setStopwords] = useState([]);
 
     //default filter values
-    const [searchByOption, setSearchByOption] = useState("");
+    const [searchByOption, setSearchByOption] = useState("intitle:");
     const [sortByOption, setSortByOption] = useState("relevance");
     const [resultsPerPage, setResultsPerPage] = useState(6);
 
@@ -43,20 +44,19 @@ function Content(){
         .catch(err => console.error("error= " + err));
     },[]);
 
-    //query preparation
-    function queryPrep(smth){   
-        //parsing     
-        let query = smth;
-        //console.log(query);
-
+    //STEP 1 of text preprocessing (no stemming yet-wanna use the unstemmed for the search query)
+    function queryPrep(str){   
         //lowercase
-        let lower = query.toLowerCase();
+        let lower = str.toLowerCase();
 
         //remove html tags completely
         let firstofall = removeHtml(lower);
+
+        //replace accented chars with ascii ones - decomposing char and accent and then ignoring all accents
+        let remAccents = firstofall.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         
         //remove special characters,non-whitespace,non-alphanumeric characters,emojis/emoticons etc (keeping ')
-        let readySentence = firstofall.replace(/[^a-zA-Z\d\s']/g, '');
+        let readySentence = remAccents.replace(/[^a-zA-Zα-ωΑ-Ω\d\s']/g, '');
         
         //tokenization - split when you see at least one whitespace character
         let tokens = readySentence.split(/\s+/);
@@ -64,22 +64,23 @@ function Content(){
         //remove any empty tokens
         let tokens2 = tokens.filter(t => t !== '');
 
-        //stop-word removal (from nltk library) - handles contractions too (MUST BE LAST STEP)
+        //stop-word removal (from nltk library) - handles contractions too
         let cleaned = stopWordRemoval(tokens2);
 
-        //remove ' as well (in case some made the cut)
+        //remove ' (in case some made the cut)
         let c = remApostrophes(cleaned);
 
+        return c;
+    }
+
+    //STEP 2 stemming on the input and data (NOT on the input that will be included in the request-den dinei kala results)
+    function textPrep(str){   
         //stemming - Porter Stemmer
         let stemmed = [];
-        for(let i=0;i<c.length;i++){
-            stemmed.push(stemmer(c[i]));
+        for(let i=0;i<str.length;i++){
+            stemmed.push(stemmer(str[i]));
         }
-        
-        //george ela,  U.S.A  PALi to ka-lo to don't prm's ,nai pali? 12dog nai       ..... pali ..ta idia t<html> idia.
-        //the dog walked at the beautiful park outside roaming the prettily decorated streets
-        
-        //console.log(c);
+        console.log(stemmed);
 
         return stemmed;
     }
@@ -100,186 +101,13 @@ function Content(){
 
     function stopWordRemoval(tokenArray){
         let r = [];
-        for(let i=0;i<tokenArray.length;i++)
-            if(!stopwords.includes(tokenArray[i]))
+        for(let i=0;i<tokenArray.length;i++){
+            if(!stopwords.includes(tokenArray[i])){
                 r.push(tokenArray[i]);
+            }
+        }
         return r;
     }
-
-    let stemmer = (function(){
-        let step2list = {
-                "ational" : "ate",
-                "tional" : "tion",
-                "enci" : "ence",
-                "anci" : "ance",
-                "izer" : "ize",
-                "bli" : "ble",
-                "alli" : "al",
-                "entli" : "ent",
-                "eli" : "e",
-                "ousli" : "ous",
-                "ization" : "ize",
-                "ation" : "ate",
-                "ator" : "ate",
-                "alism" : "al",
-                "iveness" : "ive",
-                "fulness" : "ful",
-                "ousness" : "ous",
-                "aliti" : "al",
-                "iviti" : "ive",
-                "biliti" : "ble",
-                "logi" : "log"
-            },
-    
-            step3list = {
-                "icate" : "ic",
-                "ative" : "",
-                "alize" : "al",
-                "iciti" : "ic",
-                "ical" : "ic",
-                "ful" : "",
-                "ness" : ""
-            },
-    
-            c = "[^aeiou]",          // consonant
-            v = "[aeiouy]",          // vowel
-            C = c + "[^aeiouy]*",    // consonant sequence
-            V = v + "[aeiou]*",      // vowel sequence
-    
-            mgr0 = "^(" + C + ")?" + V + C,               // [C]VC... is m>0
-            meq1 = "^(" + C + ")?" + V + C + "(" + V + ")?$",  // [C]VC[V] is m=1
-            mgr1 = "^(" + C + ")?" + V + C + V + C,       // [C]VCVC... is m>1
-            s_v = "^(" + C + ")?" + v;                   // vowel in stem
-    
-        return function (w) {
-            let 	stem,
-                suffix,
-                firstch,
-                re,
-                re2,
-                re3,
-                re4;
-    
-            if (w.length < 3) { return w; }
-    
-            firstch = w.substr(0,1);
-            if (firstch === "y") {
-                w = firstch.toUpperCase() + w.substr(1);
-            }
-    
-            // Step 1a
-            re = /^(.+?)(ss|i)es$/;
-            re2 = /^(.+?)([^s])s$/;
-    
-            if (re.test(w)) { w = w.replace(re,"$1$2"); }
-            else if (re2.test(w)) {	w = w.replace(re2,"$1$2"); }
-    
-            // Step 1b
-            re = /^(.+?)eed$/;
-            re2 = /^(.+?)(ed|ing)$/;
-            if (re.test(w)) {
-                let fp = re.exec(w);
-                re = new RegExp(mgr0);
-                if (re.test(fp[1])) {
-                    re = /.$/;
-                    w = w.replace(re,"");
-                }
-            } else if (re2.test(w)) {
-                let fp = re2.exec(w);
-                stem = fp[1];
-                re2 = new RegExp(s_v);
-                if (re2.test(stem)) {
-                    w = stem;
-                    re2 = /(at|bl|iz)$/;
-                    re3 = new RegExp("([^aeiouylsz])\\1$");
-                    re4 = new RegExp("^" + C + v + "[^aeiouwxy]$");
-                    if (re2.test(w)) {	w = w + "e"; }
-                    else if (re3.test(w)) { re = /.$/; w = w.replace(re,""); }
-                    else if (re4.test(w)) { w = w + "e"; }
-                }
-            }
-    
-            // Step 1c
-            re = /^(.+?)y$/;
-            if (re.test(w)) {
-                let fp = re.exec(w);
-                stem = fp[1];
-                re = new RegExp(s_v);
-                if (re.test(stem)) { w = stem + "i"; }
-            }
-    
-            // Step 2
-            re = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
-            if (re.test(w)) {
-                let fp = re.exec(w);
-                stem = fp[1];
-                suffix = fp[2];
-                re = new RegExp(mgr0);
-                if (re.test(stem)) {
-                    w = stem + step2list[suffix];
-                }
-            }
-    
-            // Step 3
-            re = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
-            if (re.test(w)) {
-                let fp = re.exec(w);
-                stem = fp[1];
-                suffix = fp[2];
-                re = new RegExp(mgr0);
-                if (re.test(stem)) {
-                    w = stem + step3list[suffix];
-                }
-            }
-    
-            // Step 4
-            re = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
-            re2 = /^(.+?)(s|t)(ion)$/;
-            if (re.test(w)) {
-                let fp = re.exec(w);
-                stem = fp[1];
-                re = new RegExp(mgr1);
-                if (re.test(stem)) {
-                    w = stem;
-                }
-            } else if (re2.test(w)) {
-                let fp = re2.exec(w);
-                stem = fp[1] + fp[2];
-                re2 = new RegExp(mgr1);
-                if (re2.test(stem)) {
-                    w = stem;
-                }
-            }
-    
-            // Step 5
-            re = /^(.+?)e$/;
-            if (re.test(w)) {
-                let fp = re.exec(w);
-                stem = fp[1];
-                re = new RegExp(mgr1);
-                re2 = new RegExp(meq1);
-                re3 = new RegExp("^" + C + v + "[^aeiouwxy]$");
-                if (re.test(stem) || (re2.test(stem) && !(re3.test(stem)))) {
-                    w = stem;
-                }
-            }
-    
-            re = /ll$/;
-            re2 = new RegExp(mgr1);
-            if (re.test(w) && re2.test(w)) {
-                re = /.$/;
-                w = w.replace(re,"");
-            }
-    
-            // and turn initial Y back to y
-    
-            if (firstch === "y") {
-                w = firstch.toLowerCase() + w.substr(1);
-            }
-    
-            return w;
-        }
-    })();
 
     function search(){
         //initialize current page with every new search
@@ -287,14 +115,15 @@ function Content(){
         //for pagination
         setRSP(resultsPerPage);
 
+        let q = queryPrep(inputValue);
+
         try {
-            if (queryPrep(inputValue) && queryPrep(inputValue).length > 0) {
+            if (q && q.length > 0) {
                 //asynchronous call to API
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${queryPrep(inputValue)}&orderBy=${sortByOption}&maxResults=40&key=${key}`)
+                fetch(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${q}&orderBy=${sortByOption}&maxResults=40&key=${key}`)
                     .then(response => response.json())
-                    .then(console.log(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${queryPrep(inputValue)}&orderBy=${sortByOption}&maxResults=40&key=${key}`))
-                    .then(data => setData(data.items))
-                    .then(preprocessing(data)) //acts on double click cause data hasnt updated yet(asynchronous)
+                    .then(console.log(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${q}&orderBy=${sortByOption}&maxResults=40&key=${key}`))
+                    .then(data => {setData(data.items); preprocessing(data.items)})
                     .then(setFinal(inputValue))
                     .catch(err => console.error('error fetching data:', err));
             } else {
@@ -307,49 +136,120 @@ function Content(){
         }
     }
 
-    //kanw nlp gia tous titlous arxika (1o bhma)
+    //nlp gia to searchby pedio antistoixa
     function preprocessing(dt){
-        let processed = [];
-        let indexer = [];
-        for (let i = 0; i < dt.length; i++) {
-            if (dt[i].volumeInfo.title) {
-                processed.push({ 'id': i, 'terms': queryPrep(dt[i].volumeInfo.title) });
-                for(let j=0;j<processed[i].terms.length;j++){
-                    indexer.push({ 'term': processed[i].terms[j], 'docId': i, });
-                    indexer.sort((x,y) => x.term.localeCompare(y.term) || x.docId - y.docId);
+        if(dt){
+            //to request ginetai ws pros to epilegmeno pedio(request param) kai edw filtraro ta responses ws pros to idio pedio gia even better results & gia thn epilogh description
+            let workField = "";
+            let field = searchByOption;
+            console.log(field);
+            
+            let processed = [];
+            let indexer = [];
+            for (let i = 0; i < dt.length; i++) {
+                switch (field){
+                    case 'intitle:' : workField = dt[i].volumeInfo.title;
+                    break;
+                    case 'inauthor:' : workField = dt[i].volumeInfo.authors ? [...dt[i].volumeInfo.authors].join(", ") : undefined;
+                    break;
+                    case 'inpublisher:' : workField = dt[i].volumeInfo.publisher;
+                    break;
+                    case 'subject:' : workField = dt[i].volumeInfo.categories ? [...dt[i].volumeInfo.categories].join(", ") : undefined;
+                    break;
+                    case 'isbn:' : workField = dt[i].volumeInfo.industryIdentifiers ? [...dt[i].volumeInfo.industryIdentifiers].map(tmp => tmp.identifier).join(", ") : undefined;
+                    break;
+                    case '' : workField = dt[i].volumeInfo.description ? dt[i].volumeInfo.description : undefined;
+                    break;
+                    default : workField = dt[i].volumeInfo.title;
+                    break;
                 }
-            } else {
-                processed.push({ 'id': i, 'terms': '' });
+                console.log(workField);
+                if (workField) {
+                    let q = queryPrep(workField);
+                    processed.push({ 'id': i, 'terms': textPrep(q) });
+                    for(let j=0;j<processed[i].terms.length;j++){
+                        indexer.push({ 'term': processed[i].terms[j], 'docId': i, });
+                        indexer.sort((x,y) => x.term.localeCompare(y.term) || x.docId - y.docId);
+                    }
+                } else {
+                    processed.push({ 'id': i, 'terms': '' });
+                }
             }
-        }
-        console.log(processed);
-        console.log(indexer);
-        
-        return invertedIndex(indexer);        
+            console.log(processed);
+            console.log(indexer);
+            
+            return invertedIndex(indexer);   
+        }     
     }
 
     function invertedIndex(index){
+        let q = textPrep(queryPrep(inputValue));
         let inverted = [];
         let almostInverted = Object.groupBy(index, ({ term }) => term);
         for(let i=0;i<Object.keys(almostInverted).length;i++){
             //edw kratao mono oses katagrafes exoun terms pou uparxoyn kai sto query mou, ta alla den ta xreiazomai etsi kialliws
-            if(queryPrep(inputValue).includes(Object.keys(almostInverted)[i])){
-                inverted.push({ 'term': Object.keys(almostInverted)[i], 'freq': Object.values(almostInverted)[i].length, 'postList': Object.values(almostInverted)[i].map(item => item.docId)});
+            if(q.includes(Object.keys(almostInverted)[i])){
+                inverted.push({ 'term': Object.keys(almostInverted)[i], 
+                                'docFreq': [...new Set(Object.values(almostInverted)[i].map(item => item.docId))].length, 
+                                'postList': [...new Set(Object.values(almostInverted)[i].map(item => item.docId))] });
+                                //edw tha breis kai to term frequency otan to xreiasteis
             }
         }
         
         console.log(almostInverted);
         console.log(inverted);
 
+        if(inverted && inverted.length > 0){
+            //tajinomo me bash thn suxnothta emfanishs twn orwn se biblia - gia beltistopoihsh ths efarmoghs ths sugxwneushs
+            inverted.sort((x,y) => x.docFreq - y.docFreq);
+
+            let tmp = inverted[0].postList;
+            for(let i=2;i<inverted.length+1;i++){
+                tmp = intersect(tmp,inverted[i-1].postList); 
+            }
+            //etoimo gia rank
+            console.log(tmp);
+        }
+
         return inverted;
     }
+
+    //books that contain ALL the query tokens basically (san logiko kai)
+    function intersect(plist1, plist2){
+        let p1=0, p2=0;
+
+        let answer = [];
+        while(plist1[p1] !== undefined && plist2[p2] !== undefined){
+            if(plist1[p1] === plist2[p2]){
+                answer.push(plist1[p1]);
+                p1 += 1;
+                p2 += 1;
+            }else if(plist1[p1] < plist2[p2]){
+                p1 += 1;
+            }else{
+                p2 += 1;
+            }
+        }
+        return answer;
+    }
+
+    const countResults = useCallback(() => {
+        let count = 0;
+        if(currentPage < numbersInPaginationComp.length){
+            count = rsp;
+        }else{
+            count = data.length - rsp*(currentPage-1);
+        }
+        return count;
+    },[currentPage, numbersInPaginationComp, rsp, data]);
+
 
     //useCallback hook so function wont automatically run on every render (and affect our useEffect) - it will run only when its dependencies update
     const getResultMessage = useCallback(() => {
         const resultInfoElem = document.getElementById("resultInfo");
         const navBar = document.getElementById("pagesContainer");
         if(data && data.length !== 0 && final){
-            resultInfoElem.innerHTML = "Results for: \"" + removeHtml(final) + "\" - " + rsp + "/" + data.length + " books returned";
+            resultInfoElem.innerHTML = "Results for: \"" + removeHtml(final) + "\" - " + countResults() + "/" + data.length + " books returned";
             navBar.style.display = "block";
         }else if(final){
             resultInfoElem.innerHTML = "Sorry.. no books found for: \"" + removeHtml(final) + "\" in this field..";
@@ -358,7 +258,7 @@ function Content(){
             resultInfoElem.innerHTML = "";
             navBar.style.display = "none";
         }
-    },[final, data, rsp]);
+    },[final, data, countResults]);
 
     //runs on every render (no double clicks - waiting for state changes after render)
     useEffect(() => {

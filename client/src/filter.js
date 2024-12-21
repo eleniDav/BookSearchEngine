@@ -22,8 +22,6 @@ function Filter({search, sort, rCount, r, s1, s2}) {
                 <div className="searchByFilter">
                     <span>Search by: </span>
                     <ul>
-                        <li><input type="radio" id="all" checked={searchBy === ""} onChange={() => setSearchBy("")}></input>
-                            <label htmlFor="all">All fields</label></li>
                         <li><input type="radio" id="title" checked={searchBy === "intitle:"} onChange={() => setSearchBy("intitle:")}></input>
                             <label htmlFor="title">Title</label></li>
                         <li><input type="radio" id="isbn" checked={searchBy === "isbn:"} onChange={() => setSearchBy("isbn:")}></input>
@@ -34,6 +32,8 @@ function Filter({search, sort, rCount, r, s1, s2}) {
                             <label htmlFor="publisher">Publisher</label></li>
                         <li><input type="radio" id="category" checked={searchBy === "subject:"} onChange={() => setSearchBy("subject:")}></input>
                             <label htmlFor="category">Category</label></li>
+                        <li><input type="radio" id="description" checked={searchBy === ""} onChange={() => setSearchBy("")}></input>
+                            <label htmlFor="all">Description</label></li>
                     </ul>
                 </div>
                 <div className="sortByFilter">
