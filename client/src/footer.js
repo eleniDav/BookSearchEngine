@@ -6,6 +6,7 @@ import { FaGithub } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { FaLocationDot } from "react-icons/fa6";
 import { RxDotFilled } from "react-icons/rx";
+import { Link } from "react-router-dom";
 
 function Footer() {
 
@@ -18,9 +19,9 @@ function Footer() {
                     <a href="https://www.ihu.gr" target="_blank" rel="noreferrer"><button><FaLocationDot /> International Hellenic University</button></a>
                 </div>
                 <div className="footer_info2">
-                    <a href="#about">About</a><RxDotFilled />
-                    <a href="#books">Books</a><RxDotFilled />
-                    <a href="#home" onClick={() => window.location.reload()}>Home</a>
+                    <Link to="/about">About</Link><RxDotFilled />
+                    <Link to="/api">Books</Link><RxDotFilled />
+                    <Link to="/">Home</Link>
                 </div>
                 <div className="footer_info3">
                     <div className="uni">
