@@ -51,10 +51,10 @@ function Content(){
         //remove possible html tags
         let firstofall = removeHtml(str);
 
-        //NEED TO HANDLE LOGIC OPERATORS AND WILDCARDS(*?-for now-) AT SOME POINT..
-        let secondofall = firstofall.replace(/( AND | and )/g, ' && ').replace(/( OR | or )/g, ' || ').replace(/( NOT | not )/g, ' ! ');
-        let thirdofall = secondofall.replace(/["#$%()+,./:;<=>@^_`{}~-]/g, '');
-        
+        //NEED TO HANDLE LOGICAL OPERATORS AND WILDCARDS(*?-for now-) AT SOME POINT..
+        let secondofall = firstofall.replace(/( && )/g, ' AND ').replace(/( \|\| )/g, ' OR ').replace(/( ! )/g, ' NOT ');
+        let thirdofall = secondofall.replace(/["&!|#$%()+,./:;<=>@^_`{}~-]/g, '');
+
         //tokenization - split when you see at least one whitespace character
         let tokens = thirdofall.split(/\s+/);
 
@@ -65,6 +65,8 @@ function Content(){
         let cleaned = stopWordRemoval(tokens2);
 
         let readyforsearch = cleaned.join("+");
+
+        console.log(readyforsearch);
 
         return readyforsearch;
     }
@@ -130,22 +132,45 @@ function Content(){
     }
 
     function search(){
-        //initialize current page with every new search
+        //initialize current page to the first one with every new search
         setCurrentPage(1);
         //for pagination
         setRSP(resultsPerPage);
 
         let q = reqInputPrep(inputValue);
+        const allTheData = [];
+        const apiCalls = [];
 
         try {
             if (q && q.length > 0) {
-                //asynchronous call to API
-                fetch(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${q}&orderBy=${sortByOption}&maxResults=40&key=${key}`)
-                    .then(response => response.json())
-                    .then(console.log(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${q}&orderBy=${sortByOption}&maxResults=40&key=${key}`))
-                    .then(data => {setData(data.items); ranking(data.items)})
+                //combine the results of many asynchronous calls to the API (to get more than 40 results)
+                //4 calls with 40 results each = 160 total results (max)
+                for(let sCount=0;sCount<150;sCount+=40){
+                    apiCalls.push(`https://www.googleapis.com/books/v1/volumes?q=${searchByOption}${q}&startIndex=${sCount}&maxResults=40&key=${key}`);
+                }
+                //array of fetch promises
+                const fetchPromises = apiCalls.map(apiCall => fetch(apiCall));
+
+                //fetch the data from all the calls, combine & use them
+                Promise.all(fetchPromises)
+                    .then(responses => Promise.all(responses.map(response => response.json())))
+                    .then(dt => {
+                        if(dt.length > 0 ){
+                            dt.forEach(function(d){
+                                if(d.items){
+                                    allTheData.push(...d.items);
+                                }
+                            });            
+                            console.log(allTheData);
+                            setData(allTheData);
+                            ranking(allTheData);
+                        }else{
+                            setData([]);
+                            getResultMessage();
+                        }
+                    })
                     .then(setFinal(inputValue))
-                    .catch(err => console.error('error fetching data:', err));
+                    .catch(err => console.error('error fetching data:', err));                
             } else {
                 setFinal(inputValue);
                 setData([]);
@@ -156,83 +181,115 @@ function Content(){
         }
     }
 
-    function ranking(dt){
-        //ola arxika tha exoun rank 5 
-        /*  auta pou menoun me to 5 den periexoun kanenan apo tous orous sto epilegmeno pedio (logiko not)
-            mporei px (pedio:title)na periexoun enan aptous orous sto subtitle kai giauto na epistrafhkan h (pedio:description)
-            na exoun epistrafei gt enas aptous orous brisketai sto title (gt einai to default request pou psaxnei titlo kai content)
-            alla oxi sto description */
-        let toBeRanked = [];
-        for(let i=0;i<dt.length;i++){
-            toBeRanked.push({ "rank": 5, "dt": dt[i] });
-        }
-        console.log(toBeRanked);
-        
-        //osa exoun toulaxiston 1 apo tous orous tou query tha exoun rank=2 (logiko or)
-        let secondaryResults = preprocessing(dt)[1];
-        for(let i=0;i<toBeRanked.length;i++){
-            if(secondaryResults.includes(i)){
-                toBeRanked[i].rank = 2;
-            }            
-        }
+    function ranking(dt) {
+        if (dt) {
+            //api default sorting => relevancy
 
-        //rank=1 gia ta books pou periexoun sto antistoixo pedio pou exei epilexthei OLOUS tous orous tou query - top results - (logiko and)
-        let topResults = preprocessing(dt)[0];
-        for(let i=0;i<toBeRanked.length;i++){
-            if(topResults.includes(i)){
-                toBeRanked[i].rank = 1;
-            }            
-        }
-        console.log(toBeRanked);
+            //tajinomhsh me bash thn suxnothta emfanishs twn orwn sto epilegmeno pedio
+            if (sortByOption === "relevance") {
+                let results = preprocessing(dt);
 
-        toBeRanked.sort((x,y) => x.rank - y.rank);
-        setRankedData(toBeRanked.map(item => item.dt));
+                let toBeRanked = [];
+                let secondaryResults = results[1];
+                let topResults = results[0];
+
+                //ola arxika tha exoun rank 5 
+                /*  auta pou menoun me to 5 den periexoun kanenan apo tous orous sto epilegmeno pedio (logiko not)
+                    mporei px (pedio:title)na periexoun enan aptous orous sto subtitle kai giauto na epistrafhkan h (pedio:description)
+                    na exoun epistrafei gt enas aptous orous brisketai sto title (gt einai to default request pou psaxnei titlo kai content)
+                    alla oxi sto description */
+                for (let i = 0; i < dt.length; i++) {
+                    toBeRanked.push({ "rank": 5, "dt": dt[i] });
+
+                    //osa exoun toulaxiston 1 apo tous orous tou query tha exoun rank=2 (logiko or)
+                    if (secondaryResults.includes(i)) {
+                        toBeRanked[i].rank = 2;
+                    }
+
+                    //rank=1 gia ta books pou periexoun sto antistoixo pedio pou exei epilexthei OLOUS tous orous tou query - top results - (logiko and)
+                    if (topResults.includes(i)) {
+                        toBeRanked[i].rank = 1;
+                    }
+                }
+
+                toBeRanked.sort((x, y) => x.rank - y.rank);
+                setRankedData(toBeRanked.map(item => item.dt));
+                console.log(toBeRanked);
+            }
+            //tajinomhsh me bash thn hmeromhnia ekdoshs
+            //filtro pano sta idia 40 most relevant pou epistrefontai apo default - so not THE most recent, just the most recent out of these 40 results
+            else if (sortByOption === "newest") { 
+                let toBeRanked = dt;
+                
+                toBeRanked.sort(function(x, y) {
+                    //books with no publish date -> ranked at the bottom
+                    if(x.volumeInfo.publishedDate === undefined){
+                        return 1;
+                    }
+                    if(y.volumeInfo.publishedDate === undefined){
+                        return -1;
+                    }
+                    
+                    //compare them as strings
+                    x = x.volumeInfo.publishedDate.split('-').join(''); 
+                    y = y.volumeInfo.publishedDate.split('-').join(''); 
+
+                    //prwta ta most recent - descending order (1->prwto auto apo dejia tou telesth -1->prwto auto apo aristera tou telesth 0->idia tajinomhsh)
+                    return x < y ? 1 : x > y ? -1 : 0;
+                });
+
+                setRankedData(toBeRanked);
+                console.log(toBeRanked);
+            }
+        }else {
+            setRankedData([]);
+            getResultMessage();
+        }
     }
 
     //nlp gia to searchby pedio antistoixa
-    function preprocessing(dt){
-        if(dt){
+    function preprocessing(dt) {
+        if (dt) {
             //to request ginetai ws pros to epilegmeno pedio(request param) kai edw filtraro ta responses ws pros to idio pedio gia even better results & gia thn epilogh description
             let workField = "";
             let field = searchByOption;
             console.log(field);
-            
+
             let processed = [];
             let indexer = [];
-            for (let i=0;i<dt.length;i++) {
-                switch (field){
-                    case 'intitle:' : workField = dt[i].volumeInfo.title;
-                    break;
-                    case 'inauthor:' : workField = dt[i].volumeInfo.authors ? [...dt[i].volumeInfo.authors].join(", ") : undefined;
-                    break;
-                    case 'inpublisher:' : workField = dt[i].volumeInfo.publisher;
-                    break;
-                    case 'subject:' : workField = dt[i].volumeInfo.categories ? [...dt[i].volumeInfo.categories].join(", ") : undefined;
-                    break;
-                    case 'isbn:' : workField = dt[i].volumeInfo.industryIdentifiers ? [...dt[i].volumeInfo.industryIdentifiers].map(tmp => tmp.identifier).join(", ") : undefined;
-                    break;
-                    case '' : workField = dt[i].volumeInfo.description ? dt[i].volumeInfo.description : undefined;
-                    break;
-                    default : workField = dt[i].volumeInfo.title;
-                    break;
+            for (let i = 0; i < dt.length; i++) {
+                switch (field) {
+                    case 'intitle:': workField = dt[i].volumeInfo.title;
+                        break;
+                    case 'inauthor:': workField = dt[i].volumeInfo.authors ? [...dt[i].volumeInfo.authors].join(", ") : undefined;
+                        break;
+                    case 'inpublisher:': workField = dt[i].volumeInfo.publisher ? dt[i].volumeInfo.publisher : undefined;
+                        break;
+                    case 'subject:': workField = dt[i].volumeInfo.categories ? [...dt[i].volumeInfo.categories].join(", ") : undefined;
+                        break;
+                    case 'isbn:': workField = dt[i].volumeInfo.industryIdentifiers ? [...dt[i].volumeInfo.industryIdentifiers].map(tmp => tmp.identifier).join(", ") : undefined;
+                        break;
+                    case '': workField = dt[i].volumeInfo.description ? dt[i].volumeInfo.description : undefined;
+                        break;
+                    default: workField = dt[i].volumeInfo.title;
+                        break;
                 }
                 console.log(workField);
                 if (workField) {
-                    let q = textPrep(workField);
-                    processed.push({ 'id': i, 'terms': q });
-                    for(let j=0;j<processed[i].terms.length;j++){
+                    processed.push({ 'id': i, 'terms': textPrep(workField) });
+                    for (let j = 0; j < processed[i].terms.length; j++) {
                         indexer.push({ 'term': processed[i].terms[j], 'docId': i, });
-                        indexer.sort((x,y) => x.term.localeCompare(y.term) || x.docId - y.docId);
                     }
+                    indexer.sort((x, y) => x.term.localeCompare(y.term) || x.docId - y.docId);
                 } else {
                     processed.push({ 'id': i, 'terms': '' });
                 }
             }
             console.log(processed);
             console.log(indexer);
-            
-            return invertedIndex(indexer);   
-        }     
+
+            return invertedIndex(indexer);
+        }
     }
 
     function invertedIndex(index){
@@ -240,17 +297,23 @@ function Content(){
         let inverted = [];
         let tmp = [];
         let tmp2 = [];
-        let almostInverted = Object.groupBy(index, ({ term }) => term);
-        for(let i=0;i<Object.keys(almostInverted).length;i++){
-            //edw kratao mono oses katagrafes exoun terms pou uparxoyn kai sto query mou, ta alla den ta xreiazomai etsi kialliws
-            if(q.includes(Object.keys(almostInverted)[i])){
-                inverted.push({ 'term': Object.keys(almostInverted)[i], 
-                                'docFreq': [...new Set(Object.values(almostInverted)[i].map(item => item.docId))].length, 
-                                'postList': [...new Set(Object.values(almostInverted)[i].map(item => item.docId))] });
-                                //edw tha breis kai to term frequency otan to xreiasteis
+
+        let inversionPrep = [];
+        //edw kratao mono oses katagrafes exoun terms pou uparxoyn kai sto query mou, ta alla den ta xreiazomai etsi kialliws -me kathusteroun
+        for(let i=0;i<index.length;i++){
+            if(q.includes(index[i].term)){
+                inversionPrep.push(index[i]);
             }
         }
+
+        let almostInverted = Object.groupBy(inversionPrep, ({ term }) => term);
+        for(let i=0;i<Object.keys(almostInverted).length;i++){
+            inverted.push({ 'term': Object.keys(almostInverted)[i], 
+                            'docFreq': [...new Set(Object.values(almostInverted)[i].map(item => item.docId))].length, 
+                            'postList': [...new Set(Object.values(almostInverted)[i].map(item => item.docId))] });
+        }
         
+        console.log(inversionPrep);
         console.log(almostInverted);
         console.log(inverted);
 
@@ -264,7 +327,7 @@ function Content(){
                 tmp = intersect(tmp,inverted[i-1].postList); 
                 tmp2 = intersect2(tmp2,inverted[i-1].postList);
             }
-            //etoima gia rank
+            //next step -> rank
             console.log(tmp); //results me olous tous orous
             console.log(tmp2); //results me toulaxiston 1 aptous orous
         }
@@ -299,13 +362,15 @@ function Content(){
     }
 
     const countResults = useCallback(() => {
-        let count = 0;
-        if(currentPage < numbersInPaginationComp.length){
-            count = rsp;
-        }else{
-            count = data.length - rsp*(currentPage-1);
+        if(data){
+            let count = 0;
+            if(currentPage < numbersInPaginationComp.length){
+                count = rsp;
+            }else{ //sthn teleutaia selida exw < epilegmeno arithmo results per page (sunhthws)
+                count = data.length - rsp*(currentPage-1);
+            }
+            return count;
         }
-        return count;
     },[currentPage, numbersInPaginationComp, rsp, data]);
 
 
@@ -368,8 +433,6 @@ function Content(){
                         {rankedData ? rankedData.slice(firstIndex,lastIndex).map(item => (
                             <Books key={item.etag} info={item}/>
                         )) : getResultMessage()}
-                        {console.log(rankedData)} {/*ranked results*/}
-                        {console.log(data)} {/* default results */}
                     </ul>
                     <nav id="pagesContainer" style={{display: "none"}}>
                         <ul className="pages">
