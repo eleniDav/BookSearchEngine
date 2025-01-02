@@ -4,7 +4,7 @@ function ErrorPage() {
 
     return (
         <>
-            <div className="searchBarContainer">Something went wrong.. Try again..</div>
+            <div className="searchBarContainer"><b style={{color: "rgb(0, 60, 67)"}}>Something went wrong.. Try again..</b></div>
         </>
     );
 }

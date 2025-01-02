@@ -33,7 +33,7 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     align-items: center;
 }
 
-.header button{
+.header a{
     border: none;
     cursor: pointer;
     background: transparent;
@@ -44,9 +44,10 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
     margin: auto;
     padding-top: 10px;
     padding-bottom: 20px;
+    text-decoration: none;
 }
 
-.header button:hover{
+.header a:hover{
     color: rgb(0, 60, 67);
 }
 
@@ -198,7 +199,7 @@ and for the main part of the page to be of 1 fraction unit=it will expand if the
 
 #pagesContainer{
     margin: auto;
-    width: 80%;
+    width: 100%;
 }
 
 .pages{

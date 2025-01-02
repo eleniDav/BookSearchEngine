@@ -9,7 +9,6 @@ import 'dotenv/config';
 import { stemmer } from 'stemmer';
 
 function Content(){
-    const [data, setData] = useState([]);
     const [inputValue, setInputValue] = useState("");
     const [final, setFinal] = useState("");
     const [stopwords, setStopwords] = useState([]);
@@ -27,8 +26,8 @@ function Content(){
     const lastIndex = currentPage * rsp; //last result index in every page
     const firstIndex = lastIndex - rsp; //first result index in every page
     let numOfPages = 0;
-    if(data){
-        numOfPages = Math.ceil(data.length / rsp);
+    if(rankedData){
+        numOfPages = Math.ceil(rankedData.length / rsp);
     }
     //... is a spread operator that takes an iterable(array) and expands it into individual elements
     const numbersInPaginationComp = [...Array(numOfPages + 1).keys()].slice(1); //to show the number defining each page basically px 1 to 5
@@ -46,14 +45,17 @@ function Content(){
         .catch(err => console.error("error= " + err));
     },[]);
 
+    let andFound = 0;
+    let orFound = 0;
+
     //processing of the input query that will be included in the request
     function reqInputPrep(str){   
         //remove possible html tags
         let firstofall = removeHtml(str);
 
-        //NEED TO HANDLE LOGICAL OPERATORS AND WILDCARDS(*?-for now-) AT SOME POINT..
-        let secondofall = firstofall.replace(/( && )/g, ' AND ').replace(/( \|\| )/g, ' OR ').replace(/( ! )/g, ' NOT ');
-        let thirdofall = secondofall.replace(/["&!|#$%()+,./:;<=>@^_`{}~-]/g, '');
+        //logical operators (very basic) 
+        let secondofall = firstofall.replace(/(\b && |\band )/g, ' AND ').replace(/(\b \|\| |\bor )/g, ' OR ').replace(/(\bnot |\bNOT | !)/g, ' -');
+        let thirdofall = secondofall.replace(/["&!|#$%()+,./:;<=>@^_`{}~]/g, '');
 
         //tokenization - split when you see at least one whitespace character
         let tokens = thirdofall.split(/\s+/);
@@ -61,14 +63,28 @@ function Content(){
         //remove any empty tokens
         let tokens2 = tokens.filter(t => t !== '');
 
+        if(tokens2.includes("AND")){
+            andFound = 1;
+        }else if(tokens2.includes("OR")){
+            orFound = 1;
+        }
+
         //stop-word removal (from nltk library) - handles contractions too
         let cleaned = stopWordRemoval(tokens2);
 
         let readyforsearch = cleaned.join("+");
+        
+        let notHandleBegin = "";
+        if(readyforsearch[0] === "-"){
+            notHandleBegin = readyforsearch.replace(/^-/, '%20+-');
+        }
+        else{
+            notHandleBegin = readyforsearch;
+        }
 
-        console.log(readyforsearch);
+        console.log(notHandleBegin);
 
-        return readyforsearch;
+        return notHandleBegin;
     }
 
     //text preprocessing (for input text and data of the epilegmeno field only(to make matches), DIFFERENT PROCESS FROM THE REQUEST QUERY)
@@ -162,10 +178,9 @@ function Content(){
                                 }
                             });            
                             console.log(allTheData);
-                            setData(allTheData);
                             ranking(allTheData);
                         }else{
-                            setData([]);
+                            setRankedData([]);
                             getResultMessage();
                         }
                     })
@@ -173,7 +188,7 @@ function Content(){
                     .catch(err => console.error('error fetching data:', err));                
             } else {
                 setFinal(inputValue);
-                setData([]);
+                setRankedData([]);
                 getResultMessage();
             }
         } catch (error) {
@@ -185,41 +200,77 @@ function Content(){
         if (dt) {
             //api default sorting => relevancy
 
+            let results = preprocessing(dt);
+            let toBeRanked = [];
+            let secondaryResults = results[1];
+            let topResults = results[0];
+
             //tajinomhsh me bash thn suxnothta emfanishs twn orwn sto epilegmeno pedio
             if (sortByOption === "relevance") {
-                let results = preprocessing(dt);
+                if(andFound === 1){
+                    for (let i = 0; i < dt.length; i++) {
+                        //an brw and tote emfanish mono autwn me olous tous orous sto antistoixo pedio - (logiko and)
+                        if (topResults.includes(i)) {
+                            toBeRanked.push(dt[i]);
+                        }
+                    }
+                    setRankedData(toBeRanked);
+                    console.log(toBeRanked);
+                }else if(orFound === 1){
+                    for (let i = 0; i < dt.length; i++) {
+                        //an brw or tote emfanish mono autwn me toulaxiston enan aptous orous sto antistoixo pedio - (logiko or)
+                        if (secondaryResults.includes(i)) {
+                            toBeRanked.push(dt[i]);
+                        }
+                    }
+                    setRankedData(toBeRanked);
+                    console.log(toBeRanked);
+                }else{
+                    //default activity
+                    //ola arxika tha exoun rank 5 
+                    /*  auta pou menoun me to 5 den periexoun kanenan apo tous orous sto epilegmeno pedio (san logiko not)
+                        mporei px (pedio:title)na periexoun enan aptous orous sto subtitle kai giauto na epistrafhkan h (pedio:description)
+                        na exoun epistrafei gt enas aptous orous brisketai sto title h to eswteriko tou bibliou(gt einai to default request pou psaxnei titlo kai content)
+                        alla oxi sto description */
+                    for (let i = 0; i < dt.length; i++) {
+                        toBeRanked.push({ "rank": 5, "dt": dt[i] });
 
-                let toBeRanked = [];
-                let secondaryResults = results[1];
-                let topResults = results[0];
+                        //osa exoun toulaxiston 1 apo tous orous tou query tha exoun rank=2 (logiko or)
+                        if (secondaryResults.includes(i)) {
+                            toBeRanked[i].rank = 2;
+                        }
 
-                //ola arxika tha exoun rank 5 
-                /*  auta pou menoun me to 5 den periexoun kanenan apo tous orous sto epilegmeno pedio (logiko not)
-                    mporei px (pedio:title)na periexoun enan aptous orous sto subtitle kai giauto na epistrafhkan h (pedio:description)
-                    na exoun epistrafei gt enas aptous orous brisketai sto title (gt einai to default request pou psaxnei titlo kai content)
-                    alla oxi sto description */
-                for (let i = 0; i < dt.length; i++) {
-                    toBeRanked.push({ "rank": 5, "dt": dt[i] });
-
-                    //osa exoun toulaxiston 1 apo tous orous tou query tha exoun rank=2 (logiko or)
-                    if (secondaryResults.includes(i)) {
-                        toBeRanked[i].rank = 2;
+                        //rank=1 gia ta books pou periexoun sto antistoixo pedio pou exei epilexthei OLOUS tous orous tou query - top results - (logiko and)
+                        if (topResults.includes(i)) {
+                            toBeRanked[i].rank = 1;
+                        }
                     }
 
-                    //rank=1 gia ta books pou periexoun sto antistoixo pedio pou exei epilexthei OLOUS tous orous tou query - top results - (logiko and)
-                    if (topResults.includes(i)) {
-                        toBeRanked[i].rank = 1;
-                    }
+                    toBeRanked.sort((x, y) => x.rank - y.rank);
+                    setRankedData(toBeRanked.map(item => item.dt));
+                    console.log(toBeRanked);
                 }
-
-                toBeRanked.sort((x, y) => x.rank - y.rank);
-                setRankedData(toBeRanked.map(item => item.dt));
-                console.log(toBeRanked);
             }
             //tajinomhsh me bash thn hmeromhnia ekdoshs
             //filtro pano sta idia 40 most relevant pou epistrefontai apo default - so not THE most recent, just the most recent out of these 40 results
             else if (sortByOption === "newest") { 
-                let toBeRanked = dt;
+                if(andFound === 1){
+                    for (let i = 0; i < dt.length; i++) {
+                        //an brw and tote emfanish mono autwn me olous tous orous sto antistoixo pedio - (logiko and)
+                        if (topResults.includes(i)) {
+                            toBeRanked.push(dt[i]);
+                        }
+                    }
+                }else if(orFound === 1){
+                    for (let i = 0; i < dt.length; i++) {
+                        //an brw or tote emfanish mono autwn me toulaxiston enan aptous orous sto antistoixo pedio - (logiko or)
+                        if (secondaryResults.includes(i)) {
+                            toBeRanked.push(dt[i]);
+                        }
+                    }
+                }else{
+                    toBeRanked = dt;
+                }
                 
                 toBeRanked.sort(function(x, y) {
                     //books with no publish date -> ranked at the bottom
@@ -362,24 +413,24 @@ function Content(){
     }
 
     const countResults = useCallback(() => {
-        if(data){
+        if(rankedData){
             let count = 0;
             if(currentPage < numbersInPaginationComp.length){
                 count = rsp;
             }else{ //sthn teleutaia selida exw < epilegmeno arithmo results per page (sunhthws)
-                count = data.length - rsp*(currentPage-1);
+                count = rankedData.length - rsp*(currentPage-1);
             }
             return count;
         }
-    },[currentPage, numbersInPaginationComp, rsp, data]);
+    },[currentPage, numbersInPaginationComp, rsp, rankedData]);
 
 
     //useCallback hook so function wont automatically run on every render (and affect our useEffect) - it will run only when its dependencies update
     const getResultMessage = useCallback(() => {
         const resultInfoElem = document.getElementById("resultInfo");
         const navBar = document.getElementById("pagesContainer");
-        if(data && data.length !== 0 && final){
-            resultInfoElem.innerHTML = "Results for: \"" + removeHtml(final) + "\" - " + countResults() + "/" + data.length + " books returned";
+        if(rankedData && rankedData.length !== 0 && final){
+            resultInfoElem.innerHTML = "Results for: \"" + removeHtml(final) + "\" - " + countResults() + "/" + rankedData.length + " books returned";
             navBar.style.display = "block";
         }else if(final){
             resultInfoElem.innerHTML = "Sorry.. no books found for: \"" + removeHtml(final) + "\" in this field..";
@@ -388,7 +439,7 @@ function Content(){
             resultInfoElem.innerHTML = "";
             navBar.style.display = "none";
         }
-    },[final, data, countResults]);
+    },[final, rankedData, countResults]);
 
     //runs on every render (no double clicks - waiting for state changes after render)
     useEffect(() => {
