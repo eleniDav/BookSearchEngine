@@ -45,6 +45,7 @@ function Content(){
         .catch(err => console.error("error= " + err));
     },[]);
 
+    //to handle AND & OR
     let andFound = 0;
     let orFound = 0;
 
@@ -53,7 +54,7 @@ function Content(){
         //remove possible html tags
         let firstofall = removeHtml(str);
 
-        //logical operators (very basic) 
+        //handling logical operators (very basic) 
         let secondofall = firstofall.replace(/(\b && |\band )/g, ' AND ').replace(/(\b \|\| |\bor )/g, ' OR ').replace(/(\bnot |\bNOT | !)/g, ' -');
         let thirdofall = secondofall.replace(/["&!|#$%()+,./:;<=>@^_`{}~]/g, '');
 
@@ -76,7 +77,7 @@ function Content(){
         
         let notHandleBegin = "";
         if(readyforsearch[0] === "-"){
-            notHandleBegin = readyforsearch.replace(/^-/, '%20+-');
+            notHandleBegin = readyforsearch.replace(/^-/, '%20+-'); 
         }
         else{
             notHandleBegin = readyforsearch;
