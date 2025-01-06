@@ -1,6 +1,7 @@
 import React from "react";
 import MoreInfo from "./moreInfo";
 import { useState } from "react";
+import defaultPic from "./assets/icon.png";
 
 function Books(props) {
     const data = props.info.volumeInfo;
@@ -69,7 +70,7 @@ function Books(props) {
                     <div className="bookContainer" onClick={()=> {setShow(true); setBook(props)}}>
                         <div className="bookInfo">
                             <div className="mainInfo">
-                                <img src={picture ? picture : "icon.png"} alt=""></img>
+                                <img src={picture ? picture : defaultPic} alt=""></img>
                                 <div className="info">
                                     <span className="title">{data.title}</span>
                                     <p>{fetchAuthors()}</p>

@@ -7,6 +7,7 @@ import Filter from './filter';
 import Popup from 'reactjs-popup';
 import 'dotenv/config'; 
 import { stemmer } from 'stemmer';
+import stopWordList from './assets/stopwords.txt';
 
 function Content(){
     const [inputValue, setInputValue] = useState("");
@@ -37,7 +38,7 @@ function Content(){
 
     //set the stopwords from txt file(source:nltk library) to a local array - will be executed only once on the first render
     useEffect(() =>{
-        fetch("stopwords.txt")
+        fetch(stopWordList)
         .then(res => res.text())
         .then((stoppers) => {
             setStopwords(stoppers.split(/\r?\n/));

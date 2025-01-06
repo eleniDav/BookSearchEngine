@@ -1,6 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
+  "homepage": "https://users.it.teithe.gr/~iee2019034/Bookie",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^6.6.3",

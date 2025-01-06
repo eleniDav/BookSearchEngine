@@ -7,6 +7,7 @@ import { IoMdMail } from "react-icons/io";
 import { FaLocationDot } from "react-icons/fa6";
 import { RxDotFilled } from "react-icons/rx";
 import { Link } from "react-router-dom";
+import uni2 from "./assets/uni2.png";
 
 function Footer() {
 
@@ -25,7 +26,7 @@ function Footer() {
                 </div>
                 <div className="footer_info3">
                     <div className="uni">
-                        <a href="https://www.iee.ihu.gr" target="_blank" rel="noreferrer"><button className="uni_logo"><img src="uni2.png" alt=""></img></button></a>
+                        <a href="https://www.iee.ihu.gr" target="_blank" rel="noreferrer"><button className="uni_logo"><img src={uni2} alt=""></img></button></a>
                         <span>Department of IT and Electronic Systems Engineering</span>
                     </div>
                     <div className="socials">
