@@ -2,6 +2,7 @@ import React from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { FaAnglesRight } from "react-icons/fa6";
 import './css/moreInfo.css';
+import defaultPic from "./assets/icon.png";
 
 function MoreInfo({show, book, authors, id, onClose}) {
     
@@ -91,7 +92,7 @@ function MoreInfo({show, book, authors, id, onClose}) {
                         <button className="close" onClick={onClose}><IoCloseCircleOutline id="closeIcon"/></button>
                         <div className="moreInfoDetails">
                             <div className="moreInfo1">
-                                <img src={picture ? picture : "icon.png"} alt=""></img>
+                                <img src={picture ? picture : defaultPic} alt=""></img>
 
                                 <div className="titles">
                                     <span className="title">{data.title}</span>
